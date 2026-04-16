@@ -1,0 +1,7 @@
+{
+  "description": "Node Devices (DRA) team roster — maps Jira display names to GitHub handles",
+  "members": {
+    "Jira Display Name": "github-handle",
+    "Another Person": "their-github-handle"
+  }
+}

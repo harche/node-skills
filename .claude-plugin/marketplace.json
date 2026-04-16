@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "node-skills",
+  "description": "OpenShift Node team skills for Claude Code",
+  "owner": {
+    "name": "harpatil"
+  },
+  "plugins": [
+    {
+      "name": "node-assistant",
+      "source": "./node-assistant",
+      "description": "OpenShift Node team assistant for development, deployment, testing, debugging, documentation, release, and workflow tasks across kubelet, MCO, CRI-O, crun, conmonrs, and Kueue operator.",
+      "category": "workflow",
+      "version": "0.2.0",
+      "dependencies": []
+    }
+  ]
+}
