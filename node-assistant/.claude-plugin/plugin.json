@@ -1,5 +1,5 @@
 {
   "name": "node-assistant",
-  "description": "OpenShift Node team assistant for development, deployment, testing, debugging, documentation, release, and workflow tasks across kubelet, MCO, CRI-O, crun, conmonrs, and Kueue operator.",
-  "version": "0.2.0"
+  "description": "OpenShift Node team assistant for development and deployment tasks across kubelet, MCO, CRI-O, crun, conmonrs, and Kueue operator.",
+  "version": "0.3.0"
 }

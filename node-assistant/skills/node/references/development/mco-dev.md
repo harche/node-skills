@@ -1,119 +1,40 @@
-# MCO (Machine Config Operator) Development
+# MCO (Machine Config Operator): Non-Obvious Notes (Tribal Knowledge)
 
-## Repository
+- **Repo**: `https://github.com/openshift/machine-config-operator.git` (no upstream — MCO is OpenShift-only)
 
-```bash
-git clone https://github.com/openshift/machine-config-operator.git
-cd machine-config-operator
-```
+For build commands, repo layout, CRD types, and test targets — browse the repo directly (Makefile, README, go.mod, pkg/apis/).
 
-## MCO Components
+## Rendering Pipeline
 
-The MCO consists of several components that manage node configuration:
+MachineConfigs are sorted **lexicographically by name** before merging. This is why naming conventions matter (e.g., `00-worker`, `01-worker-custom`). Later configs override earlier ones for files (by path) and systemd units (by name). Kernel arguments and extensions are accumulated (union).
 
-| Component | Binary | Description |
-|-----------|--------|-------------|
-| **machine-config-operator** | `machine-config-operator` | Top-level operator; manages other components |
-| **machine-config-controller** | `machine-config-controller` | Renders MachineConfigs, manages MachineConfigPools |
-| **machine-config-daemon** (MCD) | `machine-config-daemon` | Runs on every node; applies configuration, manages updates |
-| **machine-config-server** (MCS) | `machine-config-server` | Serves Ignition configs to joining nodes |
+## MCD Reboot Rules
 
-## Key CRDs
+The MCD **does** trigger a reboot when:
+- Files in `/etc` or `/usr` change
+- Systemd units are added/removed/modified
+- Kernel arguments or OS extensions change
+- The OS image changes
 
-| CRD | Purpose |
-|-----|---------|
-| `MachineConfig` | Declares desired machine configuration (files, systemd units, kernel args, etc.) |
-| `MachineConfigPool` | Groups nodes and associates rendered MachineConfigs |
-| `ControllerConfig` | Internal; cluster-level configuration for the MCO |
-| `KubeletConfig` | User-facing; applies custom KubeletConfiguration to a pool |
-| `ContainerRuntimeConfig` | User-facing; applies custom CRI-O configuration to a pool |
+The MCD **does not** reboot when:
+- Only SSH keys are updated
+- Only node annotations change
 
-## Build System
+## CVO Override Warning
 
-### Build Everything
+The Cluster Version Operator (CVO) will **revert manual image overrides** on MCO deployments. During development, scale down CVO:
 
 ```bash
-make
+oc scale deployment cluster-version-operator -n openshift-cluster-version --replicas=0
 ```
 
-### Build Individual Components
+Remember to scale it back when done.
 
-```bash
-make daemon          # MCD only
-make controller      # machine-config-controller only
-make operator        # machine-config-operator only
-make server          # machine-config-server only
-```
+## On-Cluster Layering (OCP 4.13+)
 
-### Build Container Images
+On-cluster layering builds custom OS images using `MachineOSConfig` and `MachineOSBuild` resources. The MCD applies layered images via `rpm-ostree rebase` or `bootc switch`.
 
-```bash
-make image           # Build all images
-```
+## Other Notes
 
-### Quick Start
-
-Clone and create a worktree per the [standard setup](../SETUP.md). To build and test:
-
-```bash
-make              # Build all binaries
-make test         # Run unit tests
-make daemon       # Build MCD only for fast iteration
-```
-
-## Repository Layout
-
-```
-cmd/                          # Binary entrypoints
-  machine-config-operator/
-  machine-config-controller/
-  machine-config-daemon/
-  machine-config-server/
-pkg/
-  controller/                 # MachineConfig rendering, pool management
-  daemon/                     # MCD logic (apply configs, update OS, reboot)
-  server/                     # MCS Ignition serving
-  operator/                   # Operator lifecycle
-  apis/machineconfiguration/  # CRD types and generated code
-  helpers/                    # Shared utilities
-templates/                    # Default MachineConfig templates
-install/                      # CRD manifests, RBAC
-test/                         # E2E tests
-manifests/                    # Operator manifests for OLM
-```
-
-## Testing
-
-### Unit Tests
-
-```bash
-make test
-```
-
-### E2E Tests
-
-```bash
-# Requires a running OCP cluster with KUBECONFIG set
-make test-e2e
-```
-
-### Run Specific Unit Tests
-
-```bash
-go test ./pkg/daemon/... -v -run TestUpdate
-go test ./pkg/controller/... -v -run TestRender
-```
-
-## Workflow: Typical MCD Change
-
-1. Edit code in `pkg/daemon/`
-2. Build: `make daemon`
-3. Run unit tests: `go test ./pkg/daemon/... -v`
-4. Deploy to cluster for testing (see `mco/building.md`)
-5. Run e2e tests against the cluster
-
-## Sub-References
-
-- **[Building the MCO](mco/building.md)** -- prerequisites, full build, component build, container images, deploying custom builds
-- **[MCO Architecture](mco/architecture.md)** -- component interaction, rendering pipeline, update flow, Ignition, OS updates and layering
-- **[MCO Testing](mco/testing.md)** -- unit tests, e2e tests, CI job structure, test environment setup
+- MCP `maxUnavailable` defaults to 1 — nodes update one at a time.
+- Machine Config Server (MCS) serves Ignition configs on port **22623**.

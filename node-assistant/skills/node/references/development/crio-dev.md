@@ -1,109 +1,26 @@
-# CRI-O Development for OpenShift
+# CRI-O: Non-Obvious Notes (Tribal Knowledge)
 
-## Repositories
+- **Upstream**: `https://github.com/cri-o/cri-o.git`
+- **Downstream (OpenShift)**: `https://github.com/openshift/cri-o.git`
 
-| Repo | Purpose |
-|------|---------|
-| `github.com/cri-o/cri-o` | Upstream CRI-O |
-| `github.com/openshift/cri-o` | OpenShift downstream fork |
+For build commands, repo layout, dependencies, and test targets — browse the repo directly (Makefile, README, go.mod).
 
-For OpenShift-specific work, use the downstream fork. For upstream features and bug fixes, work against the upstream repo first and backport.
+## Branch Mapping
 
-```bash
-# Upstream
-git clone https://github.com/cri-o/cri-o.git
+OCP 4.X uses CRI-O 1.(X-4+17).x. The formula: **CRI-O minor = OCP minor + 13**.
 
-# Downstream (OpenShift)
-git clone https://github.com/openshift/cri-o.git
-```
+| OCP | CRI-O |
+|-----|-------|
+| 4.18 | 1.31.x |
+| 4.17 | 1.30.x |
+| 4.16 | 1.29.x |
 
-## Branch Strategy
+Downstream branches are `release-4.X`, upstream are `release-1.X`.
 
-| Branch | Purpose |
-|--------|---------|
-| `main` | Upstream development |
-| `release-1.X` | Upstream stable releases |
-| `release-4.X` | OpenShift downstream (tracks upstream release-1.X) |
+## OpenShift-Specific
 
-OCP 4.18 uses CRI-O 1.31.x, OCP 4.17 uses CRI-O 1.30.x, etc. The minor version mapping is: CRI-O 1.(OCP_minor + 13).
-
-## Build System
-
-### Quick Build
-
-```bash
-make
-```
-
-### Build Binaries Only
-
-```bash
-make binaries
-```
-
-This produces `bin/crio` and `bin/pinns`.
-
-### Build with Specific Tags
-
-```bash
-make GO_BUILDTAGS="containers_image_openpgp"
-```
-
-## Key Dependencies
-
-| Dependency | Purpose |
-|------------|---------|
-| `containers/image` | Image pulling and management |
-| `containers/storage` | Container filesystem storage |
-| `conmon` / `conmon-rs` | Container monitor process |
-| `crun` / `runc` | OCI runtime |
-| `containers/common` | Shared container tooling config |
-| `CNI plugins` / `Multus` | Network setup |
-
-## Configuration
-
-CRI-O configuration on RHCOS nodes:
-
-| Path | Purpose |
-|------|---------|
-| `/etc/crio/crio.conf` | Main configuration file |
-| `/etc/crio/crio.conf.d/` | Drop-in configuration directory |
-| `/etc/containers/registries.conf` | Image registry configuration |
-| `/etc/containers/storage.conf` | Storage driver configuration |
-| `/etc/containers/policy.json` | Image signature policy |
-
-On OpenShift, CRI-O configuration is managed by the MCO via `ContainerRuntimeConfig` CRs and MachineConfigs.
-
-## Repository Layout
-
-```
-cmd/crio/             # crio binary entrypoint
-server/               # CRI gRPC server implementation
-internal/             # Internal packages
-  config/             # Configuration parsing
-  factory/            # Container/sandbox creation
-  lib/                # Core container runtime library
-  storage/            # Image and container storage
-pkg/                  # Public packages
-  annotations/        # OCI/CRI annotation handling
-  config/             # Public configuration types
-  sandbox/            # Sandbox (pod) management
-test/                 # Integration tests
-contrib/              # Systemd units, packaging
-```
-
-## Quick Start
-
-Clone and create a worktree per the [standard setup](../SETUP.md). To build and test (Linux only — CRI-O does not build natively on macOS):
-
-```bash
-make binaries
-make testunit
-sudo make testintegration  # requires root and runc/crun
-```
-
-## Sub-References
-
-- **[Building CRI-O](crio/building.md)** -- prerequisites, build commands, cross-compilation, RPM and container image builds
-- **[CRI-O Configuration](crio/configuration.md)** -- config file structure, drop-in dirs, runtime/storage/network config
-- **[CRI-O Testing](crio/testing.md)** -- unit tests, integration tests, CRI conformance, CI setup
+- CRI-O **does not build natively on macOS** — CGO is required for seccomp and system libraries. Use a containerized build for cross-compilation.
+- On RHCOS, CRI-O config is **managed by the MCO**. Do not edit `/etc/crio/crio.conf` directly — it will be overwritten. Use `ContainerRuntimeConfig` CRs instead.
+- Drop-in files in `/etc/crio/crio.conf.d/` follow naming conventions: `00-default` (RHCOS base), `01-ctrcfg-*` (from ContainerRuntimeConfig CR), `10-*` (MCO overrides).
+- Registry mirrors on OpenShift: configure via `ImageContentSourcePolicy` or `ImageDigestMirrorSet` CRs, not by editing `/etc/containers/registries.conf`.
+- CRI-O exposes Prometheus metrics at `localhost:9537/metrics`.
