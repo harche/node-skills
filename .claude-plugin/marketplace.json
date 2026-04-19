@@ -9,9 +9,9 @@
     {
       "name": "node-assistant",
       "source": "./node-assistant",
-      "description": "OpenShift Node team assistant for development and deployment tasks across kubelet, MCO, CRI-O, crun, conmonrs, and Kueue operator.",
+      "description": "OpenShift Node team assistant for development, deployment, debugging, and workflow tasks across kubelet, MCO, CRI-O, crun, conmonrs, Kueue operator, Jira, Red Hat KB/support cases, Prometheus, and platform docs.",
       "category": "workflow",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": []
     }
   ]
