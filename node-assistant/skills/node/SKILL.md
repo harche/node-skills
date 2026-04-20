@@ -1,6 +1,6 @@
 ---
 name: node
-description: "OpenShift Node team assistant for development, deployment, testing, debugging, documentation, release, and workflow tasks. Covers kubelet, Machine Config Operator (MCO), CRI-O, crun, conmonrs, and OpenShift Kueue operator. Use this skill whenever the user asks about building, testing, deploying, or debugging any OpenShift node component — even if they don't say 'node team' explicitly. Triggers on mentions of kubelet, MCO, MachineConfig, CRI-O, crun, conmonrs, Kueue operator, RHCOS, must-gather, debug binary deployment, layered images, node e2e tests, Prow CI jobs, z-stream, backports, or any OpenShift node-layer development workflow. Also triggers on Jira issues (OCPNODE-*, OCPBUGS-*), Red Hat Knowledge Base, support cases, Prometheus metrics/PromQL, or Kubernetes/OpenShift documentation lookups."
+description: "OpenShift Node team assistant. Covers kubelet, MCO, CRI-O, crun, conmonrs, Kueue operator, Jira (OCPNODE/OCPBUGS), Red Hat KB/support cases, Prometheus, and K8s/OCP docs. Triggers on any OpenShift node-layer development, deployment, debugging, or workflow task."
 ---
 
 ## How to use this skill
