@@ -1,6 +1,33 @@
 # Node Team Jira Reference
 
-Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_ROOT}/scripts/jira.sh` wraps the REST API — run `jira.sh help` for commands.
+Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_ROOT}/scripts/jira.sh` wraps the REST API.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `jira.sh get <KEY>` | Full issue details |
+| `jira.sh search '<JQL>' [limit]` | Search with JQL |
+| `jira.sh comments <KEY>` | List comments |
+| `jira.sh issue-deep-dive <KEY>` | Issue + comments + linked issues |
+| `jira.sh bug-overview <team>` | Untriaged, unassigned, blockers, new bugs |
+| `jira.sh my-bugs-data <team>` | My assigned bugs |
+| `jira.sh my-board-data <team>` | My sprint board items |
+| `jira.sh my-standup-data <team>` | My standup prep (board + bugs + comments) |
+| `jira.sh sprint-dashboard <team>` | Sprint issues by status, workload, blockers |
+| `jira.sh standup-data <team>` | Team standup (dashboard + recent updates) |
+| `jira.sh epic-progress <KEY>` | Epic children + completion stats |
+| `jira.sh release-data <team> [ver]` | Release readiness (blockers, bugs, epics) |
+| `jira.sh pickup-data <team>` | Unassigned items to pick up |
+| `jira.sh planning-data <team>` | Sprint planning (carryovers + backlog + bugs) |
+| `jira.sh carryover-report <team>` | Not-done items from previous sprint |
+| `jira.sh team-activity <team>` | Per-member sprint items |
+| `jira.sh transitions <KEY>` | Available status transitions |
+| `jira.sh transition <ID> <KEY>` | Perform a transition |
+| `jira.sh comment "<text>" <KEY>` | Add a comment |
+| `jira.sh link <KEY> <URL> <title>` | Add a remote link |
+
+Team values: `core`, `green`, `blue`, `dra`, `kueue`, `all`
 
 ## Projects
 
