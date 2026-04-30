@@ -9,20 +9,22 @@ _COMPOSITE_STANDUP_DATA_LOADED=1
 
 cmd_standup_data() {
   local team="${1:?Team required (e.g., 'Node Devices' or 'Node Core')}"
-  local stream=false
-  [[ "${2:-}" == "--stream" ]] && stream=true
+  shift
+  local stream=false sprint_ref=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --stream) stream=true; shift ;;
+      --sprint) sprint_ref="${2:?--sprint requires a value}"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
 
   # ── Resolve team config ──────────────────────────────────────────────────
   team_config "$team"
 
-  # ── Get sprint info (active preferred, fall back to future) ──────────────
+  # ── Get sprint info ─────────────────────────────────────────────────────
   local sprint_json
-  sprint_json=$(team_sprint "$team" active 2>/dev/null) || {
-    sprint_json=$(team_sprint "$team" future 2>/dev/null) || {
-      echo '{"error":"No active or future sprint found for '"$team"'"}' >&2; return 1
-    }
-    _log "WARN" "No active sprint — using future sprint"
-  }
+  sprint_json=$(resolve_sprint "$team" "$sprint_ref") || return 1
 
   local sprint_id
   sprint_id=$(echo "$sprint_json" | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")

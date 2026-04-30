@@ -54,6 +54,8 @@ Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_R
 
 Team values: `core`, `green`, `blue`, `dra`, `kueue`, `all`
 
+All composite commands accept `--sprint <name-or-id>` to target a specific sprint instead of the active one. Example: `jira.sh sprint-dashboard core --sprint "Sprint 288"`
+
 ## Projects
 
 | Project | Tracks |

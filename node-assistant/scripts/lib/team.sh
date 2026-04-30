@@ -177,6 +177,61 @@ sys.exit(1)
 " "$sprints" "$TEAM_SPRINT_FILTER" "$state"
 }
 
+# Resolve a sprint by name substring or numeric ID.
+# If sprint_ref is empty, falls back to active → future.
+# Usage: resolve_sprint "core" ""                  → active sprint for core
+#        resolve_sprint "core" "Sprint 288"         → sprint matching "Sprint 288"
+#        resolve_sprint "core" "65617"              → sprint with id 65617
+resolve_sprint() {
+  local team="$1"
+  local sprint_ref="${2:-}"
+
+  [[ -z "${TEAM_SPRINT_FILTER:-}" ]] && team_config "$team"
+
+  # No ref → default: active, then future
+  if [[ -z "$sprint_ref" ]]; then
+    local result
+    result=$(team_sprint "$team" active 2>/dev/null) && { echo "$result"; return 0; }
+    result=$(team_sprint "$team" future 2>/dev/null) && { echo "$result"; return 0; }
+    echo '{"error":"No active or future sprint found for '"$team"'"}' >&2
+    return 1
+  fi
+
+  # Search active, future, and closed sprints for a match
+  local all_sprints=""
+  for state in active future closed; do
+    local batch
+    batch=$(cmd_sprints "$state" 2>/dev/null) || continue
+    all_sprints="${all_sprints}${all_sprints:+,}$(echo "$batch" | python3 -c "import json,sys; d=json.load(sys.stdin); print(','.join(json.dumps(s) for s in d.get('values',[])))" 2>/dev/null)"
+  done
+
+  python3 -c "
+import json, sys
+
+ref = sys.argv[1]
+raw = sys.argv[2]
+sprints = [json.loads(s) for s in raw.split(',') if s.strip()]
+
+# Try numeric ID first
+if ref.isdigit():
+    ref_id = int(ref)
+    for s in sprints:
+        if s.get('id') == ref_id:
+            print(json.dumps({'id': s['id'], 'name': s['name'], 'startDate': s.get('startDate',''), 'endDate': s.get('endDate',''), 'goal': s.get('goal','')}))
+            sys.exit(0)
+
+# Substring match on name (case-insensitive)
+ref_lower = ref.lower()
+for s in sprints:
+    if ref_lower in s.get('name', '').lower():
+        print(json.dumps({'id': s['id'], 'name': s['name'], 'startDate': s.get('startDate',''), 'endDate': s.get('endDate',''), 'goal': s.get('goal','')}))
+        sys.exit(0)
+
+print(json.dumps({'error': f'No sprint matching \"{ref}\" found'}), file=sys.stderr)
+sys.exit(1)
+" "$sprint_ref" "$all_sprints"
+}
+
 # Find the active sprint, falling back to the most recently closed sprint.
 # Returns JSON: {id, name, startDate, endDate, goal, state}
 # The "state" field indicates whether this is "active" or "closed" (fallback).

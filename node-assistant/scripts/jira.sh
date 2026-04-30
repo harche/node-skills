@@ -67,6 +67,7 @@ High-level composite commands:
   roster-sync [--force]             Download team rosters from Jira attachments
 
 Options:
+  --sprint <name-or-id>             Target a specific sprint (default: active)
   --stream                          Stream JSON Lines output (composite commands only)
 
 Environment:

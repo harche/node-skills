@@ -9,6 +9,14 @@ _COMPOSITE_MY_STANDUP_LOADED=1
 
 cmd_my_standup_data() {
   local team="${1:?Team required}"
+  shift
+  local sprint_ref=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --sprint) sprint_ref="${2:?--sprint requires a value}"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
 
   team_config "$team"
   _init_auth
@@ -16,12 +24,7 @@ cmd_my_standup_data() {
   local user_email="$JIRA_USER"
 
   local sprint_json
-  sprint_json=$(team_sprint "$team" active 2>/dev/null) || {
-    sprint_json=$(team_sprint "$team" future 2>/dev/null) || {
-      echo '{"error":"No active or future sprint found for '"$team"'"}' >&2; return 1
-    }
-    _log "WARN" "No active sprint — using future sprint"
-  }
+  sprint_json=$(resolve_sprint "$team" "$sprint_ref") || return 1
 
   local sprint_id
   sprint_id=$(echo "$sprint_json" | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
