@@ -36,25 +36,25 @@ Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_R
 
 ### Composite / dashboard commands
 
+When the user names a specific sprint (e.g. "Sprint 288"), pass `--sprint "<name>"`. Without it, the active sprint is used. The name is a substring match, so `--sprint "288"` works.
+
 | Command | What it does |
 |---|---|
+| `jira.sh sprint-dashboard <team> [--sprint <name>]` | Sprint issues by status, workload, blockers |
+| `jira.sh standup-data <team> [--sprint <name>]` | Team standup (dashboard + recent updates) |
+| `jira.sh team-activity <team> [--sprint <name>]` | Per-member sprint items |
+| `jira.sh my-board-data <team> [--sprint <name>]` | My sprint board items |
+| `jira.sh my-standup-data <team> [--sprint <name>]` | My standup prep (board + bugs + comments) |
+| `jira.sh pickup-data <team> [--sprint <name>]` | Unassigned items to pick up |
 | `jira.sh bug-overview <team>` | Untriaged, unassigned, blockers, new bugs |
 | `jira.sh my-bugs-data <team>` | My assigned bugs |
-| `jira.sh my-board-data <team>` | My sprint board items |
-| `jira.sh my-standup-data <team>` | My standup prep (board + bugs + comments) |
-| `jira.sh sprint-dashboard <team>` | Sprint issues by status, workload, blockers |
-| `jira.sh standup-data <team>` | Team standup (dashboard + recent updates) |
 | `jira.sh epic-progress <KEY>` | Epic children + completion stats |
 | `jira.sh release-data <team> [ver]` | Release readiness (blockers, bugs, epics) |
-| `jira.sh pickup-data <team>` | Unassigned items to pick up |
 | `jira.sh planning-data <team>` | Sprint planning (carryovers + backlog + bugs) |
 | `jira.sh carryover-report <team>` | Not-done items from previous sprint |
-| `jira.sh team-activity <team>` | Per-member sprint items |
 | `jira.sh roster-sync [--force]` | Download team rosters from Jira |
 
 Team values: `core`, `green`, `blue`, `dra`, `kueue`, `all`
-
-All composite commands accept `--sprint <name-or-id>` to target a specific sprint instead of the active one. Example: `jira.sh sprint-dashboard core --sprint "Sprint 288"`
 
 ## Projects
 
