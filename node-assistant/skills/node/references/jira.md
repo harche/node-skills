@@ -4,12 +4,40 @@ Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_R
 
 ## Scripts
 
+### Read commands
+
 | Command | What it does |
 |---|---|
 | `jira.sh get <KEY>` | Full issue details |
 | `jira.sh search '<JQL>' [limit]` | Search with JQL |
 | `jira.sh comments <KEY>` | List comments |
 | `jira.sh issue-deep-dive <KEY>` | Issue + comments + linked issues |
+| `jira.sh find-user <query>` | Search for a user by name (roster + Jira API) |
+| `jira.sh transitions <KEY>` | Available status transitions |
+| `jira.sh sprints [state]` | List sprints (active\|future\|closed) |
+| `jira.sh sprint-issues <sprintId> [limit]` | Issues in a sprint |
+| `jira.sh health-check` | Validate custom field IDs |
+
+### Write commands
+
+| Command | What it does |
+|---|---|
+| `jira.sh create <PROJECT> <TYPE> <SUMMARY> [extra-json]` | Create issue. Extra fields as JSON, e.g. `'{"description":...}'` |
+| `jira.sh assign <KEY> <name-or-accountId>` | Assign issue — resolves names via roster + Jira user search |
+| `jira.sh comment "<text>" <KEY...>` | Add a comment to one or more issues |
+| `jira.sh set-field <KEY> <fieldId> <value>` | Set any field (string, number, or JSON value) |
+| `jira.sh set-points <KEY> <points>` | Set story points |
+| `jira.sh link <KEY> <URL> [title]` | Add a remote link |
+| `jira.sh move-to-sprint <sprintId> <KEY...>` | Move issue(s) to a sprint |
+| `jira.sh transition <ID> <KEY...>` | Perform a transition |
+| `jira.sh close [comment] <KEY...>` | Comment (optional) + close |
+| `jira.sh start-sprint <sprintId>` | Start a sprint |
+| `jira.sh close-sprint <sprintId>` | Close a sprint |
+
+### Composite / dashboard commands
+
+| Command | What it does |
+|---|---|
 | `jira.sh bug-overview <team>` | Untriaged, unassigned, blockers, new bugs |
 | `jira.sh my-bugs-data <team>` | My assigned bugs |
 | `jira.sh my-board-data <team>` | My sprint board items |
@@ -22,10 +50,7 @@ Red Hat Jira: `redhat.atlassian.net`. The `jira.sh` script at `${CLAUDE_PLUGIN_R
 | `jira.sh planning-data <team>` | Sprint planning (carryovers + backlog + bugs) |
 | `jira.sh carryover-report <team>` | Not-done items from previous sprint |
 | `jira.sh team-activity <team>` | Per-member sprint items |
-| `jira.sh transitions <KEY>` | Available status transitions |
-| `jira.sh transition <ID> <KEY>` | Perform a transition |
-| `jira.sh comment "<text>" <KEY>` | Add a comment |
-| `jira.sh link <KEY> <URL> <title>` | Add a remote link |
+| `jira.sh roster-sync [--force]` | Download team rosters from Jira |
 
 Team values: `core`, `green`, `blue`, `dra`, `kueue`, `all`
 
@@ -131,6 +156,41 @@ Base all queries on `filter = "Node Bugs"` and append:
 | Escalations | `project = "Red Hat OpenShift Priority List" OR "Customer Impact" = "Customer Escalated" OR labels in (shift_telco5g)` |
 | CVE | `labels in (SecurityTracking) OR issuetype in (Vulnerability, Weakness)` |
 | CR | `labels = component-regression` |
+
+## Common Workflows
+
+### Creating and assigning an issue
+
+```bash
+# Create an Epic in OCPNODE
+jira.sh create OCPNODE Epic "My epic summary" '{"customfield_10011":"Epic Name Here"}'
+
+# Create a Story linked to an epic
+jira.sh create OCPNODE Story "My story summary" '{"customfield_10014":"OCPNODE-1234"}'
+
+# Assign by display name (resolves via roster + Jira API)
+jira.sh assign OCPNODE-1234 "John Smith"
+
+# Assign by accountId (if you already have it)
+jira.sh assign OCPNODE-1234 "712020:abc-def-123"
+```
+
+### Finding a user
+
+```bash
+# Searches team rosters first, then Jira user directory
+jira.sh find-user "Sabuj"
+```
+
+### Standup and bug review
+
+```bash
+# Team standup — present interactively, one person at a time, alphabetically
+standup-data core   # then present as a table, one-by-one
+
+# Bug overview — single table sorted by latest update
+bug-overview core   # present with bug-id, description, priority, status, assignee
+```
 
 ## Gotchas
 

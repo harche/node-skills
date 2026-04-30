@@ -44,6 +44,9 @@ Low-level API commands:
   move-to-sprint <sprintId> <KEY...> Move issue(s) to a sprint
   set-points <ISSUE-KEY> <points>   Set story points on an issue
   set-field <KEY> <fieldId> <value>  Set any field (value: string, number, or JSON)
+  create <PROJECT> <TYPE> <SUMMARY> [extra-fields-json]  Create a new issue
+  assign <KEY> <name-or-accountId>  Assign issue (resolves name via roster + Jira API)
+  find-user <query>                 Search for a user by name (roster + Jira API)
   link <KEY> <URL> [title]           Add a remote link (e.g., GitHub PR/issue)
   transitions <ISSUE-KEY>           Get available transitions
   transition <id> <KEY...>          Perform a transition on one or more issues
@@ -86,6 +89,9 @@ case "${1:-help}" in
   move-to-sprint) cmd_move_to_sprint "${2:?Sprint ID required}" "${@:3}" ;;
   set-points)     cmd_set_points "${2:?ISSUE-KEY required}" "${3:?Story points required}" ;;
   set-field)      cmd_set_field "${2:?ISSUE-KEY required}" "${3:?Field ID required}" "${4:?Value required}" ;;
+  create)         cmd_create "${2:?Project key required}" "${3:?Issue type required}" "${4:?Summary required}" "${5:-}" ;;
+  assign)         cmd_assign "${2:?ISSUE-KEY required}" "${3:?Assignee name or accountId required}" ;;
+  find-user)      cmd_find_user "${2:?Search query required}" ;;
   link)           cmd_link "${2:?ISSUE-KEY required}" "${3:?URL required}" "${4:-}" ;;
   transitions)    cmd_transitions "${2:?ISSUE-KEY required}" ;;
   transition)     cmd_transition "${2:?Transition ID required}" "${@:3}" ;;
